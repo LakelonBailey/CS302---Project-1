@@ -2,6 +2,8 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <iomanip>
+#include <algorithm>
 
 using namespace std;
 
@@ -24,21 +26,6 @@ vector<string> split(string line, char on) {
         }
     }
     return strings;
-}
-
-// Join a vector of strings on the provided separator
-string join(vector<string> strings, char separator) {
-    string result = "";
-    for (size_t i = 0; i < strings.size(); i++) {
-        if (i) result += separator;
-        result += strings[i];
-    }
-    return result;
-}
-
-// Replace every instance of a char in a string with a different char
-string replace(string item, char toReplace, char replaceWith) {
-    return join(split(item, toReplace), replaceWith);
 }
 
 // Convert numeric string to integer
@@ -70,7 +57,9 @@ int calculateTime(string timeString) {
 string formatTime(int time) {
     int minutes = time / 60;
     int seconds = time % 60;
-    return stringInt(minutes) + ":" + stringInt(seconds);
+    ostringstream timeString;
+    timeString << stringInt(minutes) << ':' << setw(2) << setfill('0') << stringInt(seconds);
+    return timeString.str();
 }
 
 
@@ -81,7 +70,7 @@ string formatTime(int time) {
 
 struct Song {
     string title;
-    int time;  // could also be a string
+    int time;
     int track;
 
     Song(string title, string timeString, string trackString) {
@@ -90,6 +79,7 @@ struct Song {
         this->time = calculateTime(timeString);
     }
 
+    // Print formatted values
     void print() {
         printf("                %d. %s: %s\n", track, title.c_str(), formatTime(time).c_str());
     }
@@ -103,6 +93,7 @@ struct Album {
         this->name = name;
     }
 
+    // Sum total time of all songs
     int time() {
         int total = 0;
         for (size_t i = 0; i < songs.size(); i++) {
@@ -116,7 +107,7 @@ struct Album {
     }
 
     void print() {
-        printf("        %s, %d, %s\n", name.c_str(), songCount(), formatTime(time()).c_str());
+        printf("        %s: %d, %s\n", name.c_str(), songCount(), formatTime(time()).c_str());
         for (size_t i = 0; i < songs.size(); i++) {
             songs[i].print();
         }
@@ -143,8 +134,14 @@ struct Artist {
                 return albums[i];
             }
         }
+        size_t pos;
+        for (pos = 0; pos < albums.size(); pos++) {
+            if (albumName < albums[pos]->name) {
+                break;
+            }
+        }
         Album * album = new Album(albumName);
-        albums.push_back(album);
+        albums.insert(albums.begin() + pos, album);
         return album;
     }
 
@@ -176,17 +173,23 @@ struct Artist {
 ************************************/
 
 int main(int argc, char *argv[]) {
+
+    // Open and begin reading file
     ifstream fin;
     fin.open(argv[1]);
     string line;
     vector<Artist *> artists;
-
     while (getline(fin, line)) {
+
+        // Get song info
         vector <string> songInfo = split(line, ' ');
+
+        // Find or create artist
         Artist * artist = nullptr;
         bool newArtist = true;
+        string artistName = songInfo[2];
+        replace(artistName.begin(), artistName.end(), '_', ' ');
 
-        string artistName = replace(songInfo[2], '_', ' ');
         for (size_t i = 0; i < artists.size(); i++) {
             if (artists[i]->name == artistName) {
                 artist = artists[i];
@@ -197,20 +200,42 @@ int main(int argc, char *argv[]) {
 
         if (newArtist) {
             artist = new Artist(artistName);
-            artists.push_back(artist);
+            size_t pos;
+
+            // Insert artist in correct position based on name
+            for (pos = 0; pos < artists.size(); pos++) {
+                if (artistName < artists[pos]->name) {
+                    break;
+                }
+            }
+            artists.insert(artists.begin() + pos, artist);
         }
 
-        string albumName = replace(songInfo[3], '_', ' ');
+        // Get album
+        string albumName = songInfo[3];
+        replace(albumName.begin(), albumName.end(), '_', ' ');
+
         Album * album = artist->getAlbum(albumName);
 
-        string songTitle = replace(songInfo[0], '_', ' ');
+        // Create song and add to album based on track number
+        string songTitle = songInfo[0];
+        replace(songTitle.begin(), songTitle.end(), '_', ' ');
+
         string timeString = songInfo[1];
         string trackString = songInfo[5];
         Song song = Song(songTitle, timeString, trackString);
-        album->songs.push_back(song);
+
+        size_t song_pos;
+        for (song_pos = 0; song_pos < album->songs.size(); song_pos++) {
+            if (song.track < album->songs[song_pos].track) {
+                break;
+            }
+        }
+        album->songs.insert(album->songs.begin() + song_pos, song);
 
     }
 
+    // Print artists then deallocate
     for (size_t i = 0; i < artists.size(); i++) {
         artists[i]->print();
         delete artists[i];
