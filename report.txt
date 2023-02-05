@@ -1,0 +1,16 @@
+Team Members (name/GitHub):
+    - Lakelon Bailey/LakelonBailey
+    - Cooper Sarphie/cooperalpaca
+
+Repo:
+    - https://github.com/LakelonBailey/CS302---Project-1
+
+Compilation Command:
+    - Makefile is provided, so run "make"
+
+Summary:
+    - We worked together in person on this project, with Lakelon writing the code as the "driver"
+      and both of us working equally to come up with ideas/structure. Lakelon was primarily focused
+      on developing the helper functions and the structs, while Cooper was primarily focused on
+      the main function. Because we worked solely on Lakelon's computer, you will notice that all
+      GitHub commits came from his profile.

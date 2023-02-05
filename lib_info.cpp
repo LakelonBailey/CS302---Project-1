@@ -128,12 +128,15 @@ struct Artist {
         }
     }
 
+    // Add or retrieve album
     Album * getAlbum(string albumName) {
         for (size_t i = 0; i < albums.size(); i++) {
             if (albums[i]->name == albumName) {
                 return albums[i];
             }
         }
+
+        // Add in correct spot based on lexicographical ordering
         size_t pos;
         for (pos = 0; pos < albums.size(); pos++) {
             if (albumName < albums[pos]->name) {
@@ -145,6 +148,7 @@ struct Artist {
         return album;
     }
 
+    // Get total song count
     int songCount() {
         int sum = 0;
         for (size_t i = 0; i < albums.size(); i++) sum += albums[i]->songCount();
