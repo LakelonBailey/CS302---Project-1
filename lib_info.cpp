@@ -102,6 +102,7 @@ struct Album {
         return total;
     }
 
+    // Return total of sings
     int songCount() {
         return (int)songs.size();
     }
@@ -155,6 +156,7 @@ struct Artist {
         return sum;
     }
 
+    // Format and return total time of songs
     string getTime() {
         int timeSum = 0;
         for (size_t i = 0; i < albums.size(); i++) {
